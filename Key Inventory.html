@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Key Inventory</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .form-line {
+      margin-bottom: 15px;
+    }
+
+    label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+
+    select, input[type="text"], button {
+      padding: 5px;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #uploadBtn {
+      display: none;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Key Inventory</h1>
+
+  <!-- First line -->
+  <div class="form-line">
+    <label for="actionSelect">Add, Destroy, or Move?</label>
+    <select id="actionSelect">
+      <option value="">-- Select --</option>
+      <option value="add">Add</option>
+      <option value="destroy">Destroy</option>
+      <option value="move">Move</option>
+    </select>
+  </div>
+
+  <!-- Key Unique Identifier -->
+  <div class="form-line" id="identifierLine" style="display:none;">
+    <label for="keyIdentifier">Key Unique Identifier</label>
+    <select id="keyIdentifier">
+      <option value="">-- Select --</option>
+      <option value="LCEGR">LCEGR</option>
+      <option value="LCLG">LCLG</option>
+      <option value="LCCRT">LCCRT</option>
+    </select>
+  </div>
+
+  <!-- Key Sequence Number -->
+  <div class="form-line" id="sequenceLine" style="display:none;">
+    <label for="keySequence">Key Sequence Number</label>
+    <input type="text" id="keySequence" placeholder="Enter number">
+  </div>
+
+  <!-- Upload button for Add -->
+  <div class="form-line" id="uploadBtn">
+    <button type="button">Upload Invoice</button>
+  </div>
+
+  <!-- Second line -->
+  <div class="form-line" id="secondLine" style="display:none;">
+    <label id="secondLabel"></label>
+    <select id="locationSelect">
+      <option value="">-- Select --</option>
+      <option value="box1">Key Box 1</option>
+      <option value="box2">Key Box 2</option>
+      <option value="storage">Storage Location</option>
+    </select>
+  </div>
+
+  <!-- Slot input for second line -->
+  <div class="form-line" id="slotLine" style="display:none;">
+    <label id="slotLabel"></label>
+    <input type="text" id="slotInput" placeholder="Enter slot number">
+  </div>
+
+  <!-- For Move: Destination line -->
+  <div class="form-line" id="moveDestLine" style="display:none;">
+    <label for="moveDestSelect">Location keys are moving to?</label>
+    <select id="moveDestSelect">
+      <option value="">-- Select --</option>
+      <option value="box1">Key Box 1</option>
+      <option value="box2">Key Box 2</option>
+      <option value="storage">Storage Location</option>
+    </select>
+  </div>
+
+  <div class="form-line" id="moveDestSlotLine" style="display:none;">
+    <label id="moveDestSlotLabel">Slot keys are moving to</label>
+    <input type="text" id="moveDestSlotInput" placeholder="Enter slot number">
+  </div>
+
+  <script>
+    const actionSelect = document.getElementById("actionSelect");
+    const identifierLine = document.getElementById("identifierLine");
+    const sequenceLine = document.getElementById("sequenceLine");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const secondLine = document.getElementById("secondLine");
+    const secondLabel = document.getElementById("secondLabel");
+    const locationSelect = document.getElementById("locationSelect");
+    const slotLine = document.getElementById("slotLine");
+    const slotLabel = document.getElementById("slotLabel");
+
+    const moveDestLine = document.getElementById("moveDestLine");
+    const moveDestSelect = document.getElementById("moveDestSelect");
+    const moveDestSlotLine = document.getElementById("moveDestSlotLine");
+    const moveDestSlotInput = document.getElementById("moveDestSlotInput");
+
+    actionSelect.addEventListener("change", function() {
+      const action = actionSelect.value;
+      // Reset everything
+      identifierLine.style.display = "none";
+      sequenceLine.style.display = "none";
+      secondLine.style.display = "none";
+      slotLine.style.display = "none";
+      uploadBtn.style.display = "none";
+      moveDestLine.style.display = "none";
+      moveDestSlotLine.style.display = "none";
+      locationSelect.value = "";
+      moveDestSelect.value = "";
+
+      if (action) {
+        identifierLine.style.display = "block";
+        sequenceLine.style.display = "block";
+
+        if (action === "destroy") {
+          secondLabel.textContent = "Current location of key being destroyed?";
+          secondLine.style.display = "block";
+        } else if (action === "add") {
+          uploadBtn.style.display = "block";
+          secondLabel.textContent = "Location new keys are added to?";
+          secondLine.style.display = "block";
+        } else if (action === "move") {
+          secondLabel.textContent = "Location keys are moving from?";
+          secondLine.style.display = "block";
+        }
+      }
+    });
+
+    locationSelect.addEventListener("change", function() {
+      const action = actionSelect.value;
+      const location = locationSelect.value;
+      slotLine.style.display = "none";
+      moveDestLine.style.display = "none";
+      moveDestSlotLine.style.display = "none";
+
+      if ((action === "destroy" || action === "add") &&
+          (location === "box1" || location === "box2")) {
+        if (action === "destroy") {
+          slotLabel.textContent = "Current key slot of key being destroyed?";
+        } else if (action === "add") {
+          slotLabel.textContent = "Slot new keys will be added to?";
+        }
+        slotLine.style.display = "block";
+      }
+
+      if (action === "move") {
+        // For Move: always show source slot if Key Box
+        if (location === "box1" || location === "box2") {
+          slotLabel.textContent = "Slot keys are moving from?";
+          slotLine.style.display = "block";
+        } else {
+          slotLine.style.display = "none";
+        }
+        // Show destination line
+        moveDestLine.style.display = "block";
+        moveDestSlotLine.style.display = "none"; // reset
+        moveDestSelect.value = "";
+      }
+    });
+
+    moveDestSelect.addEventListener("change", function() {
+      const dest = moveDestSelect.value;
+      if (dest === "box1" || dest === "box2") {
+        moveDestSlotLine.style.display = "block";
+      } else {
+        moveDestSlotLine.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
